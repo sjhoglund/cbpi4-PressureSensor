@@ -12,7 +12,13 @@ Plugin will add a pressure sensor option which can be used to calculate liquid v
 More to come
 
 ## Hardware requirements: ##
-More to come
+* Pressure sensor:
+    * https://www.aliexpress.com/item/32970501289.html?spm=a2g0o.9042311.0.0.27424c4dJb29Un
+    * Measuring Range: 10kPa
+    * If you need a different type of fitting (non-tri-clamp), search AliExpress for "pressure transmitter level"
+* ADS1115 (converts the sensor signal for the RPi)
+    * https://www.adafruit.com/product/1085
+    * You can find cheaper options on Amazon or AliExpress, just make sure it's an ADS1115
 
 ## Changelog: ##
 * 01-28-22: (0.0.1) Updated README
