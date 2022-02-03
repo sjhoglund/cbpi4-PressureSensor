@@ -121,17 +121,17 @@ class PressureSensor(CBPiSensor):
             volume = volumeCI / self.gallons_cubicinch
 
             if self.props.get("sensorType", "Liquid Level") == "Voltage":
-                self.value = "%.6f" % (voltage)
+                self.value = chan.voltage
             elif self.props.get("sensorType", "Liquid Level") == "Digits":
                 self.value = chan.value
             elif self.props.get("sensorType", "Liquid Level") == "Pressure":
-                self.value = "%.6f" % (pressureValue)
+                self.value = pressureValue
             elif self.props.get("sensorType", "Liquid Level") == "Liquid Level":
-                self.value = "%.6f" % (liquidLevel)
+                self.value = liquidLevel
             elif self.props.get("sensorType", "Liquid Level") == "Volume":
-                self.value = "%.6f" % (volume)
+                self.value = volume
             else:
-                pass
+                self.value = chan.voltage
             
             self.push_update(self.value)
             await asyncio.sleep(1)
