@@ -120,15 +120,15 @@ class PressureSensor(CBPiSensor):
             volumeCI = self.PI * radiusSquared * liquidLevel
             volume = volumeCI / self.gallons_cubicinch
 
-            if self.sensorType == "Voltage":
+            if self.props.get("sensorType", "Liquid Level") == "Voltage":
                 self.value = "%.6f" % (voltage)
-            elif self.sensorType == "Digits":
+            elif self.props.get("sensorType", "Liquid Level") == "Digits":
                 self.value = chan.value
-            elif self.sensorType == "Pressure":
+            elif self.props.get("sensorType", "Liquid Level") == "Pressure":
                 self.value = "%.6f" % (pressureValue)
-            elif self.sensorType == "Liquid Level":
+            elif self.props.get("sensorType", "Liquid Level") == "Liquid Level":
                 self.value = "%.6f" % (liquidLevel)
-            elif self.sensorType == "Volume":
+            elif self.props.get("sensorType", "Liquid Level") == "Volume":
                 self.value = "%.6f" % (volume)
             else:
                 pass
