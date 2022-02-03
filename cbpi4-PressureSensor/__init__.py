@@ -35,18 +35,17 @@ logger = logging.getLogger(__name__)
 
 class PressureSensor(CBPiSensor):
     
-    # Variables to be used with calculations
-    self.GRAVITY = 9.807
-    self.PI = 3.1415
-    # Conversion values
-    self.kpa_psi = 0.145
-    self.bar_psi = 14.5038
-    self.inch_mm = 25.4
-    self.gallons_cubicinch = 231
-    
     def __init__(self, cbpi, id, props):
         super(PressureSensor, self).__init__(cbpi, id, props)
         self.value = 0
+        # Variables to be used with calculations
+        self.GRAVITY = 9.807
+        self.PI = 3.1415
+        # Conversion values
+        self.kpa_psi = 0.145
+        self.bar_psi = 14.5038
+        self.inch_mm = 25.4
+        self.gallons_cubicinch = 231
     
     def convert_pressure(self, value):
         if self.props.get("pressureType", "kPa") == "PSI":
