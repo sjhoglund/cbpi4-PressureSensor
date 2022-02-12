@@ -50,8 +50,8 @@ class PressureSensor(CBPiSensor):
         self.sensorHeight = float(self.props.get("sensorHeight", 0))
         self.kettleDiameter = float(self.props.get("kettleDiameter", 0))
         self.ADSchannel = int(self.props.get("ADSchannel", 0))
-        self.pressureHigh = 14.5
-        self.pressureLow = 0
+        self.pressureHigh = self.convert_pressure(int(self.props.get("pressureHigh", 10)))
+        self.pressureLow = self.convert_pressure(int(self.props.get("pressureLow", 0)))
         #logging.info('Pressure values - low: %s , high: %s' % ((pressureLow), (pressureHigh)))
         # We need the coefficients to calculate pressure for the next step
         # Using Y=MX+B where X is the volt output difference, M is kPa/volts or pressure difference / volt difference
@@ -62,7 +62,7 @@ class PressureSensor(CBPiSensor):
         #    if the output of the sensor was 0-5V there would be no offset
         self.calcX = int(self.props.get("voltHigh", 5)) - int(self.props.get("voltLow", 0))
         #logging.info('calcX value: %s' % (calcX))
-        self.calcM = (pressureHigh - pressureLow) / calcX
+        self.calcM = (self.pressureHigh - self.pressureLow) / self.calcX
         #logging.info('calcM value: %s' % (calcM))
         self.calcB = 0
         if int(self.props.get("voltLow", 0)) > 0:
