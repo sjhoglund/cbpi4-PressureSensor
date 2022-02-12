@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
     Property.Number("voltHigh", configurable=True, default_value=5, description="Pressure Sensor maximum voltage, usually 5"),
     Property.Number("pressureLow", configurable=True, default_value=0, description="Pressure value at minimum voltage, value in kPa"),
     Property.Number("pressureHigh", configurable=True, default_value=10, description="Pressure value at maximum voltage, value in kPa"),
-    Property.Number("sensorHeight (inches)", configurable=True, default_value=0, description="Location of Sensor from the bottom of the kettle in inches"),
+    Property.Number("sensorHeight", configurable=True, default_value=0, description="Location of Sensor from the bottom of the kettle in inches"),
     Property.Number("kettleDiameter", configurable=True, default_value=0, description="Diameter of kettle in inches")
 ])
 
@@ -66,7 +66,7 @@ class PressureSensor(CBPiSensor):
         #logging.info('calcM value: %s' % (calcM))
         self.calcB = 0
         if int(self.props.get("voltLow", 0)) > 0:
-            self.calcB = (-1 * int(self.props.get("voltLow", 0))) * calcM
+            self.calcB = (-1 * int(self.props.get("voltLow", 0))) * self.calcM
         #logging.info('calcB value: %s' % (calcB))
         
     
