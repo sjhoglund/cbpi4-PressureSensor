@@ -46,6 +46,29 @@ class PressureSensor(CBPiSensor):
         self.bar_psi = 14.5038
         self.inch_mm = 25.4
         self.gallons_cubicinch = 231
+        
+        self.sensorHeight = float(self.props.get("sensorHeight", 0))
+        self.kettleDiameter = float(self.props.get("kettleDiameter", 0))
+        self.ADSchannel = int(self.props.get("ADSchannel", 0))
+        self.pressureHigh = self.convert_pressure(int(self.props.get("pressureHigh", 10)))
+        self.pressureLow = self.convert_pressure(int(self.props.get("pressureLow", 0)))
+        #logging.info('Pressure values - low: %s , high: %s' % ((pressureLow), (pressureHigh)))
+        # We need the coefficients to calculate pressure for the next step
+        # Using Y=MX+B where X is the volt output difference, M is kPa/volts or pressure difference / volt difference
+        #  B is harder to explain, it's the offset of the voltage & pressure, ex:
+        #    if volts were 1-5V and pressure was 0-6kPa
+        #    since volts start with 1, there is an offset
+        #    We calculate a value of 1.5kPa/V, therefore 1V = -1.5
+        #    if the output of the sensor was 0-5V there would be no offset
+        self.calcX = int(self.props.get("voltHigh", 5)) - int(self.props.get("voltLow", 0))
+        #logging.info('calcX value: %s' % (calcX))
+        self.calcM = (pressureHigh - pressureLow) / calcX
+        #logging.info('calcM value: %s' % (calcM))
+        self.calcB = 0
+        if int(self.props.get("voltLow", 0)) > 0:
+            self.calcB = (-1 * int(self.props.get("voltLow", 0))) * calcM
+        #logging.info('calcB value: %s' % (calcB))
+        
     
     def convert_pressure(self, value):
         if self.props.get("pressureType", "kPa") == "PSI":
@@ -60,28 +83,6 @@ class PressureSensor(CBPiSensor):
             return value / 100
 
     async def run(self):
-        
-        GRAVITY = float(self.GRAVITY)
-        
-        self.ADSchannel = int(self.props.get("ADSchannel", 0))
-        pressureHigh = self.convert_pressure(int(self.props.get("pressureHigh", 10)))
-        pressureLow = self.convert_pressure(int(self.props.get("pressureLow", 0)))
-        #logging.info('Pressure values - low: %s , high: %s' % ((pressureLow), (pressureHigh)))
-        # We need the coefficients to calculate pressure for the next step
-        # Using Y=MX+B where X is the volt output difference, M is kPa/volts or pressure difference / volt difference
-        #  B is harder to explain, it's the offset of the voltage & pressure, ex:
-        #    if volts were 1-5V and pressure was 0-6kPa
-        #    since volts start with 1, there is an offset
-        #    We calculate a value of 1.5kPa/V, therefore 1V = -1.5
-        #    if the output of the sensor was 0-5V there would be no offset
-        calcX = int(self.props.get("voltHigh", 5)) - int(self.props.get("voltLow", 0))
-        #logging.info('calcX value: %s' % (calcX))
-        calcM = (pressureHigh - pressureLow) / calcX
-        #logging.info('calcM value: %s' % (calcM))
-        calcB = 0
-        if int(self.props.get("voltLow", 0)) > 0:
-            calcB = (-1 * int(self.props.get("voltLow", 0))) * calcM
-        #logging.info('calcB value: %s' % (calcB))
         
         while self.running is True:
             
@@ -101,7 +102,7 @@ class PressureSensor(CBPiSensor):
             elif self.ADSchannel == 3:
                 chan = AnalogIn(ads, ADS.P3)
                 
-            pressureValue = (calcM * chan.voltage) + calcB    # "%.6f" % ((calcM * voltage) + calcB)
+            pressureValue = (self.calcM * chan.voltage) + self.calcB    # "%.6f" % ((calcM * voltage) + calcB)
             #logging.info("pressureValue: %s" % (pressureValue))    #debug or calibration
             
             # Time to calculate the other data values
@@ -109,13 +110,12 @@ class PressureSensor(CBPiSensor):
             # Liquid Level is calculated by H = P / (SG * G). Assume the SG of water is 1.000
             #   this is true for water at 4C
             #   note: P needs to be in BAR and H value will need to be multiplied by 100,000 to get mm
-            liquidLevel = ((self.convert_bar(pressureValue) / GRAVITY) * 100000) / self.inch_mm
+            liquidLevel = ((self.convert_bar(pressureValue) / self.GRAVITY) * 100000) / self.inch_mm
             if liquidLevel > 0.49:
-                liquidLevel += float(self.props.get("sensorHeight", 0))
+                liquidLevel += self.sensorHeight
             
             # Volume is calculated by V = PI (r squared) * height
-            kettleDiameter = float(self.props.get("kettleDiameter", 0))
-            kettleRadius = kettleDiameter / 2
+            kettleRadius = self.kettleDiameter / 2
             radiusSquared = kettleRadius * kettleRadius
             volumeCI = self.PI * radiusSquared * liquidLevel
             volume = volumeCI / self.gallons_cubicinch
