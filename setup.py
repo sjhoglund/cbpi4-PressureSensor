@@ -19,7 +19,6 @@ setup(name='cbpi4-PressureSensor',
       'cbpi4-PressureSensor': ['*','*.txt', '*.rst', '*.yaml']},
       packages=['cbpi4-PressureSensor'],
       install_requires=[
-          'cbpi>=4.0.0.33',
           'adafruit-circuitpython-ads1x15'
       ],
       long_description=long_description,
